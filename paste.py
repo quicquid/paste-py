@@ -62,7 +62,7 @@ def highlight_code(code, lang, linenos=''):
     return res
 
 def list_languages():
-    return sorted(map(lambda x: (x[0], x[1][0]), get_all_lexers()),
+    return sorted(map(lambda x: (x[0], x[1][0] if x[1] else ''), get_all_lexers()),
                   key=lambda x: x[1].lower())
 
 def lang_from_ext(ext):
@@ -135,7 +135,7 @@ def user_dir(user):
 
 def random_filename():
     res = ''
-    for i in xrange(filename_length):
+    for i in range(filename_length):
         res += choice(filename_characters)
     return res
 
@@ -160,14 +160,14 @@ def new_path(user):
 
 def dump_paste(content, user):
     filename = new_path(user)
-    with codecs.open(filename, 'w', 'utf-8') as f:
+    with codecs.open(filename, 'wb', 'utf-8') as f:
         f.write(content)
     return filename
 
 ## Users
 def read_paste(filename):
     try:
-        with codecs.open(filename, 'r', 'utf-8') as f:
+        with codecs.open(filename, 'rb', 'utf-8') as f:
             return f.read()
     except IOError:
       raise tornado.web.HTTPError(404)
@@ -192,14 +192,14 @@ def meta_dir(user, paste):
 
 def dump_meta(user, paste, meta):
     filename = meta_dir(user, paste)
-    with open(filename, 'w') as f:
+    with open(filename, 'wb') as f:
         dump(meta, f)
 
 def read_meta(user, paste):
     filename = meta_dir(user, paste)
     if not isfile(filename):
         return {}
-    with open(filename, 'r') as f:
+    with open(filename, 'rb') as f:
         return load(f)
 
 ## Logic
@@ -413,7 +413,7 @@ def run():
     if options.socket:
         print('Listening on {}'.format(options.socket))
         server = HTTPServer(application)
-        socket = bind_unix_socket(options.socket, mode=0777)
+        socket = bind_unix_socket(options.socket, mode=0o777)
         server.add_socket(socket)
     else:
         print('Listening on {}:{}'.format(options.addr, options.port))
